@@ -180,10 +180,10 @@ def search_windows(img, windows, clf, scaler, color_space = 'RGB', spatial_size 
         prediction = clf.predict(test_features)
 
         # If prediction positive (vehicle found), save the window
-        if prediction:
+        if prediction == 1:
             on_windows.append(window)
 
-    return windows
+    return on_windows
 
 def generate_datasets(vehicles, non_vehicles):
     # Get features for both datasets
@@ -220,7 +220,6 @@ def generate_datasets(vehicles, non_vehicles):
     print("Splitting dataset...")
     X_train, X_test, y_train, y_test = train_test_split(scaled_X, y, test_size=0.2, random_state=22)
 
-
     return X_train, X_test, y_train, y_test, X_scaler
     
 def load_image_lists():
@@ -242,7 +241,7 @@ def train_classifier(X_train, y_train, X_test, y_test, loss = 'hinge'):
     print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
     return svc
 
-def show_img(img):
+def show_img(img, name):
     if len(img.shape)==3:
         # Color BGR image
         plt.figure()
@@ -253,9 +252,10 @@ def show_img(img):
         plt.figure()
         plt.imshow(img, cmap='gray')
 
-    plt.show()
+    plt.savefig(osp.join('output_images', name))
     
 def display_example(clf, X_scaler):
+    i = 0
     for image_p in glob.glob('test_images/test*.jpg'):
         image = cv2.imread(image_p)
         draw_image = np.copy(image)
@@ -270,7 +270,8 @@ def display_example(clf, X_scaler):
                         hist_feat = cfg.hist_feat, hog_feat = cfg.hog_feat))
         
         window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)                    
-        show_img(window_img)
+        show_img(window_img, name = 'test_output_{}.jpg'.format(i))
+        i += 1
         
 def main():
     # Load images
